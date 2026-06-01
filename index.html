@@ -678,7 +678,9 @@ TASK 2 — Name each cluster in MAX 3 WORDS. Short, punchy, immediately readable
 
 TASK 3 — For each cluster: a 1-line description (what it IS, not what it's called), adCount, avgAgeDays (integer), oldestDays.
 
-TASK 4 — Write exactly 2 sentences of insight (under 40 words total). Sentence 1: what dominates or is unusual. Sentence 2: the one format/cluster they're not running that they should be.
+TASK 4 — Write exactly 2 sentences of insight (under 40 words total). Use the actual brand name "${brandName}" — never write "the brand", "your brand", or any placeholder. Sentence 1: what dominates or is unusual about ${brandName}'s mix. Sentence 2: the one format/cluster ${brandName} isn't running that they should be.
+
+CRITICAL: Output must be ready to paste into an email with zero editing. Do NOT use placeholders, brackets, variables, or anything the sender would need to fill in. Every word must be final and specific.
 
 Ad data (ageDays = days since ad went live):
 ${JSON.stringify(sample)}
