@@ -589,7 +589,7 @@ async function runApify(apiKey, adLibraryUrl) {
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ startUrls: [{ url: adLibraryUrl }] }),
+      body: JSON.stringify({ startUrls: [{ url: adLibraryUrl }], resultsLimit: 200 }),
     }
   );
 
