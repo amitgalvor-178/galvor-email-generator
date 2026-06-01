@@ -669,15 +669,21 @@ function buildPrompt(brandName, industry, ads) {
 
 Analyze this Meta (Facebook/Instagram) Ad Library data for "${brandName}" — a ${industry} brand.
 
-Your tasks:
-1. Group these ads into 3–7 meaningful clusters by creative theme, format, and intent. Use specific cluster names (e.g. "DPA / DCO – Catalog Retargeting", "Creator Whitelisted Ads") not vague ones ("Brand Ads").
-2. For each cluster: name, a concise 1-line description of what the cluster actually IS, adCount, avgAgeDays (rounded integer), oldestDays.
-3. Write a single sharp insight — exactly 2 sentences, no more. Sentence 1: what dominates or what's unusual in their ad mix (be specific with formats/clusters). Sentence 2: what creative format/cluster is completely missing that they should be running. Keep it under 40 words total.
+TASK 1 — Cluster the ads into 4–7 groups. Cluster by what actually differentiates the ads:
+- Content type: Offer/Discount, Problem–Solution, Explainer/Educational, Testimonial, Brand Story, etc.
+- Format: DCO/Catalog, Static Image, Video, Carousel, Reels/UGC
+- Product focus: if titles reveal specific SKUs, categories, or campaigns, split accordingly
+
+TASK 2 — Name each cluster in MAX 3 WORDS. Short, punchy, immediately readable. Examples of good names: "Catalog Retargeting", "Offer Drops", "Problem–Solution", "Explainer Videos", "Creator UGC", "Brand Story", "Product Launch". Never use full sentences or sub-clauses as names.
+
+TASK 3 — For each cluster: a 1-line description (what it IS, not what it's called), adCount, avgAgeDays (integer), oldestDays.
+
+TASK 4 — Write exactly 2 sentences of insight (under 40 words total). Sentence 1: what dominates or is unusual. Sentence 2: the one format/cluster they're not running that they should be.
 
 Ad data (ageDays = days since ad went live):
 ${JSON.stringify(sample)}
 
-Respond ONLY with valid JSON — no markdown fences, no explanation:
+Respond ONLY with valid JSON — no markdown, no explanation:
 {"clusters":[{"name":"...","description":"...","adCount":0,"avgAgeDays":0,"oldestDays":0}],"insight":"..."}`;
 }
 
