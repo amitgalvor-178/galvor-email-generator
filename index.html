@@ -660,7 +660,10 @@ function processApifyItems(items) {
     // Strip Facebook dynamic variables e.g. {{product.name}}, {{headline}}
     const cleanTitle = String(title).replace(/\{\{[^}]*\}\}/g, '').replace(/\s+/g, ' ').trim();
 
-    return { title: cleanTitle || `${format || 'Ad'} (no title)`, format, active, ageDays, platforms };
+    // DCO ads with no real title → label by format so Claude understands what they are
+    const displayTitle = cleanTitle || (format === 'DCO' ? 'Catalog/DPA ad (dynamic product feed)' : `${format || 'Ad'}`);
+
+    return { title: displayTitle, format, active, ageDays, platforms };
   }).filter(Boolean);
 }
 
@@ -679,7 +682,7 @@ TASK 1 — Cluster the ads into 4–7 groups. Cluster by what actually different
 
 TASK 2 — Name each cluster in MAX 3 WORDS. Short, punchy, immediately readable. Examples of good names: "Catalog Retargeting", "Offer Drops", "Problem–Solution", "Explainer Videos", "Creator UGC", "Brand Story", "Product Launch". Never use full sentences or sub-clauses as names.
 
-TASK 3 — For each cluster: a 1-line description (what it IS, not what it's called), adCount, avgAgeDays (integer), oldestDays.
+TASK 3 — For each cluster: a 1-line description written in plain marketing language (what the ad IS trying to do — e.g. "Retargeting ads showing products from their catalog", "Discount-led ads pushing seasonal offers"). No technical jargon. A non-technical brand manager should immediately understand it. Include adCount, avgAgeDays (integer), oldestDays.
 
 TASK 4 — Write exactly 2 sentences of insight (under 40 words total). Use the actual brand name "${brandName}" — never write "the brand", "your brand", or any placeholder. Sentence 1: what dominates or is unusual about ${brandName}'s mix. Sentence 2: the one format/cluster ${brandName} isn't running that they should be.
 
