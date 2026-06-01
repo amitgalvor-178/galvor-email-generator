@@ -583,8 +583,9 @@ const APIFY_ACTOR = 'apify~facebook-ads-scraper';
 
 async function runApify(apiKey, adLibraryUrl) {
   // Start run
+  // maxTotalChargeUsd required for pay-per-result actors ($0.005/result, 200 results ≈ $1)
   const startRes = await fetch(
-    `https://api.apify.com/v2/acts/${APIFY_ACTOR}/runs?token=${apiKey}`,
+    `https://api.apify.com/v2/acts/${APIFY_ACTOR}/runs?token=${apiKey}&maxTotalChargeUsd=2`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
