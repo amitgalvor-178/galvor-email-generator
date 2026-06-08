@@ -745,10 +745,9 @@ TASK 5 — Write a follow-up email body. Sent 3 days after email 1 with no reply
 
 Block 1 — "Hi ${firstName},"
 
-Block 2 — The data hook (3 sentences):
-  Sentence 1: "Pulled ${brandName}'s ad library." then state ONE specific ratio or count derived from the clusters (e.g. "X of Y active ads are [dominant cluster type]").
-  Sentence 2: "— while your top ${industry} competitors are running [THE GAP FORMAT from the insight] that [one concrete benefit, e.g. 'Meta treats as organic' or 'drives lower CPMs']."
-  Sentence 3: "You're already [something ${brandName} IS doing that's close to the gap]. You're just not getting [the one specific missing piece — e.g. 'the trust signal' / 'the distribution multiplier']."
+Block 2 — The data hook (2 sentences MAX):
+  Sentence 1: "Pulled ${brandName}'s ad library." then state ONE specific ratio or count from the clusters (e.g. "X of Y active ads are [dominant cluster type]").
+  Sentence 2: Combine the competitive gap AND the missing piece into one punchy sentence — e.g. "Your top ${industry} competitors are running [GAP FORMAT] that [benefit], and you're already producing [close equivalent] — just not getting [the missing piece]."
 
 Block 3 — Cost + offer (2 sentences): "That gap has a measurable RoAS cost. We can quantify it for ${brandName} specifically — 20 minutes, no deck."
 
@@ -843,9 +842,8 @@ function renderEmail({ brandName, firstName, industry, closing, result }) {
   if (fu) {
     const blocks = fu.split('\n\n').map(p => p.trim()).filter(Boolean);
     blocks.forEach((p, i) => {
-      // Greeting line gets tighter bottom margin
-      const style = i === 0 ? ' style="margin-bottom:6px;"' : '';
-      fuHtml += `<div class="email-para"${style}>${escHtml(p)}</div>`;
+      const mb = i === 0 ? '8px' : '24px';
+      fuHtml += `<div class="email-para" style="margin-bottom:${mb};">${escHtml(p)}</div>`;
     });
   } else {
     fuHtml = `<div class="email-para" style="color:rgba(255,255,255,0.3);font-style:italic;">Follow-up not generated. Try regenerating.</div>`;
