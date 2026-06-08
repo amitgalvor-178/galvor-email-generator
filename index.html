@@ -741,12 +741,24 @@ TASK 3 — For each cluster: a 1-line description written in plain marketing lan
 
 TASK 4 — Write exactly 2 sentences of insight (under 40 words total). Use the actual brand name "${brandName}" — never write "the brand", "your brand", or any placeholder. Sentence 1: what dominates or is unusual about ${brandName}'s mix. Sentence 2: the one format/cluster ${brandName} isn't running that they should be.
 
-TASK 5 — Write a short follow-up email body (3–5 sentences) for when email 1 gets no reply after 3 days. Rules:
-- Do NOT open with "Hey ${firstName}" — start with something like "Bumping this up —" or "One thing I didn't mention —"
-- Reference the competitive gap briefly from a new angle, not a repeat of email 1
-- Use "${brandName}" naturally — no placeholders
-- Close with a softer, shorter ask than email 1 (e.g. "5 minutes?")
-- Tone: feels like a human reply in a thread, not a new pitch
+TASK 5 — Write a follow-up email body. Sent 3 days after email 1 with no reply. Follow this EXACT structure — 3 blocks separated by blank lines:
+
+Block 1 — "Hi ${firstName},"
+
+Block 2 — The data hook (3 sentences):
+  Sentence 1: "Pulled ${brandName}'s ad library." then state ONE specific ratio or count derived from the clusters (e.g. "X of Y active ads are [dominant cluster type]").
+  Sentence 2: "— while your top ${industry} competitors are running [THE GAP FORMAT from the insight] that [one concrete benefit, e.g. 'Meta treats as organic' or 'drives lower CPMs']."
+  Sentence 3: "You're already [something ${brandName} IS doing that's close to the gap]. You're just not getting [the one specific missing piece — e.g. 'the trust signal' / 'the distribution multiplier']."
+
+Block 3 — Cost + offer (2 sentences): "That gap has a measurable RoAS cost. We can quantify it for ${brandName} specifically — 20 minutes, no deck."
+
+Block 4 — CTA (standalone line): "Worth a call this week?"
+
+Rules:
+- Use REAL numbers from the cluster data — never vague words like "many", "most", "several"
+- Use "${brandName}" — no placeholders ever
+- Do NOT reference the first email or say "I sent you something"
+- Tone: sharp, data-first, no fluff
 
 CRITICAL: Output must be ready to paste into an email with zero editing. Do NOT use placeholders, brackets, template variables like {{product.name}}, or anything the sender would need to fill in. Every word must be final and specific.
 
@@ -829,8 +841,11 @@ function renderEmail({ brandName, firstName, industry, closing, result }) {
   let fu = result.followUpBody || '';
   let fuHtml = '';
   if (fu) {
-    fu.split('\n\n').filter(p => p.trim()).forEach(p => {
-      fuHtml += `<div class="email-para">${escHtml(p.trim())}</div>`;
+    const blocks = fu.split('\n\n').map(p => p.trim()).filter(Boolean);
+    blocks.forEach((p, i) => {
+      // Greeting line gets tighter bottom margin
+      const style = i === 0 ? ' style="margin-bottom:6px;"' : '';
+      fuHtml += `<div class="email-para"${style}>${escHtml(p)}</div>`;
     });
   } else {
     fuHtml = `<div class="email-para" style="color:rgba(255,255,255,0.3);font-style:italic;">Follow-up not generated. Try regenerating.</div>`;
@@ -915,9 +930,12 @@ function copyPart2(part) {
     return;
   }
 
-  const paras = followUpBody.split('\n\n').filter(p => p.trim());
+  const paras = followUpBody.split('\n\n').map(p => p.trim()).filter(Boolean);
   const htmlBody = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;max-width:680px;">
-    ${paras.map(p => `<p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#1a1a1a;">${escHtml(p.trim())}</p>`).join('')}
+    ${paras.map((p, i) => {
+      const margin = i === 0 ? '0 0 6px' : '0 0 16px';
+      return `<p style="margin:${margin};font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#1a1a1a;">${escHtml(p)}</p>`;
+    }).join('')}
   </div>`;
   const plainBody = followUpBody;
 
