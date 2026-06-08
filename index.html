@@ -270,6 +270,33 @@ textarea { resize: vertical; min-height: 72px; }
 .td-count { font-weight: 700; color: #7B9FFF; }
 .td-zero { color: rgba(255,255,255,0.25) !important; }
 
+/* tabs */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding-bottom: 14px;
+}
+.tab-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.2); }
+.tab-btn.active {
+  background: rgba(43,78,255,0.12);
+  border-color: rgba(43,78,255,0.4);
+  color: #7B9FFF;
+}
+
 /* copy bar */
 .copy-bar {
   display: flex; gap: 9px;
@@ -423,15 +450,33 @@ textarea { resize: vertical; min-height: 72px; }
       <div id="emailOut" style="display:none">
         <div class="panel-label">Email Preview</div>
 
-        <div class="email-meta-label">Subject</div>
-        <div class="email-subject-val" id="eSubject"></div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(1)">Email 1</button>
+          <button class="tab-btn" onclick="switchTab(2)">Follow-up</button>
+        </div>
 
-        <div id="eBody"></div>
+        <!-- Email 1 -->
+        <div id="email1Content">
+          <div class="email-meta-label">Subject</div>
+          <div class="email-subject-val" id="eSubject"></div>
+          <div id="eBody"></div>
+          <div class="copy-bar">
+            <button class="btn-copy" id="copySubBtn" onclick="copyPart('subject')">Copy Subject</button>
+            <button class="btn-copy" id="copyBodyBtn" onclick="copyPart('body')">Copy Body</button>
+            <button class="btn-copy" id="copyAllBtn" onclick="copyPart('all')">Copy All</button>
+          </div>
+        </div>
 
-        <div class="copy-bar">
-          <button class="btn-copy" id="copySubBtn" onclick="copyPart('subject')">Copy Subject</button>
-          <button class="btn-copy" id="copyBodyBtn" onclick="copyPart('body')">Copy Body</button>
-          <button class="btn-copy" id="copyAllBtn" onclick="copyPart('all')">Copy All</button>
+        <!-- Follow-up Email -->
+        <div id="email2Content" style="display:none">
+          <div class="email-meta-label">Subject</div>
+          <div class="email-subject-val" id="e2Subject"></div>
+          <div id="e2Body"></div>
+          <div class="copy-bar">
+            <button class="btn-copy" id="copy2SubBtn" onclick="copyPart2('subject')">Copy Subject</button>
+            <button class="btn-copy" id="copy2BodyBtn" onclick="copyPart2('body')">Copy Body</button>
+            <button class="btn-copy" id="copy2AllBtn" onclick="copyPart2('all')">Copy All</button>
+          </div>
         </div>
       </div>
 
@@ -445,6 +490,7 @@ textarea { resize: vertical; min-height: 72px; }
 <script>
 // ── State ──────────────────────────────────────────
 let emailState = null;
+let activeTab = 1;
 
 // ── Init ───────────────────────────────────────────
 window.addEventListener('load', () => {
@@ -510,6 +556,15 @@ function setLoading(on) {
   btn.innerHTML = on
     ? '<div class="spin"></div><span>Working…</span>'
     : '<span>Generate Email</span>';
+}
+
+function switchTab(n) {
+  activeTab = n;
+  document.getElementById('email1Content').style.display = n === 1 ? 'block' : 'none';
+  document.getElementById('email2Content').style.display = n === 2 ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i + 1 === n);
+  });
 }
 
 function toast(msg) {
@@ -686,13 +741,20 @@ TASK 3 — For each cluster: a 1-line description written in plain marketing lan
 
 TASK 4 — Write exactly 2 sentences of insight (under 40 words total). Use the actual brand name "${brandName}" — never write "the brand", "your brand", or any placeholder. Sentence 1: what dominates or is unusual about ${brandName}'s mix. Sentence 2: the one format/cluster ${brandName} isn't running that they should be.
 
+TASK 5 — Write a short follow-up email body (3–5 sentences) for when email 1 gets no reply after 3 days. Rules:
+- Do NOT open with "Hey ${firstName}" — start with something like "Bumping this up —" or "One thing I didn't mention —"
+- Reference the competitive gap briefly from a new angle, not a repeat of email 1
+- Use "${brandName}" naturally — no placeholders
+- Close with a softer, shorter ask than email 1 (e.g. "5 minutes?")
+- Tone: feels like a human reply in a thread, not a new pitch
+
 CRITICAL: Output must be ready to paste into an email with zero editing. Do NOT use placeholders, brackets, template variables like {{product.name}}, or anything the sender would need to fill in. Every word must be final and specific.
 
 Ad data (ageDays = days since ad went live):
 ${JSON.stringify(sample)}
 
 Respond ONLY with valid JSON — no markdown, no explanation:
-{"clusters":[{"name":"...","description":"...","adCount":0,"avgAgeDays":0,"oldestDays":0}],"insight":"..."}`;
+{"clusters":[{"name":"...","description":"...","adCount":0,"avgAgeDays":0,"oldestDays":0}],"insight":"...","followUpBody":"..."}`;
 }
 
 // ── Claude API call ────────────────────────────────
@@ -760,6 +822,24 @@ function renderEmail({ brandName, firstName, industry, closing, result }) {
   html += `<div class="email-para">${escHtml(closing)}\n\nWorth it?</div>`;
 
   document.getElementById('eBody').innerHTML = html;
+
+  // Follow-up email
+  const followUpSubject = `Re: ${subject}`;
+  document.getElementById('e2Subject').textContent = followUpSubject;
+  let fu = result.followUpBody || '';
+  let fuHtml = '';
+  if (fu) {
+    fu.split('\n\n').filter(p => p.trim()).forEach(p => {
+      fuHtml += `<div class="email-para">${escHtml(p.trim())}</div>`;
+    });
+  } else {
+    fuHtml = `<div class="email-para" style="color:rgba(255,255,255,0.3);font-style:italic;">Follow-up not generated. Try regenerating.</div>`;
+  }
+  document.getElementById('e2Body').innerHTML = fuHtml;
+
+  // Reset to tab 1 on each new generation
+  switchTab(1);
+
   document.getElementById('previewEmpty').style.display = 'none';
   document.getElementById('emailOut').style.display = 'block';
 }
@@ -800,6 +880,59 @@ function copyPart(part) {
       .catch(() => showErr('Clipboard access denied. Try a different browser.'));
   } else {
     // Fallback: inject into a contenteditable and execCommand
+    const div = document.createElement('div');
+    div.contentEditable = 'true';
+    div.style.cssText = 'position:fixed;opacity:0;top:-9999px;left:-9999px';
+    div.innerHTML = fullHtml;
+    document.body.appendChild(div);
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(div);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand('copy');
+    sel.removeAllRanges();
+    document.body.removeChild(div);
+    flashBtn(btn, btnLabels[part]);
+  }
+}
+
+function copyPart2(part) {
+  if (!emailState) return;
+  const { brandName, result } = emailState;
+  const origSubject = `${brandName} isn't running this. Your competitors will.`;
+  const followUpSubject = `Re: ${origSubject}`;
+  const followUpBody = result.followUpBody || '';
+
+  const btnId = part === 'subject' ? 'copy2SubBtn' : part === 'body' ? 'copy2BodyBtn' : 'copy2AllBtn';
+  const btnLabels = { subject: 'Copy Subject', body: 'Copy Body', all: 'Copy All' };
+  const btn = document.getElementById(btnId);
+
+  if (part === 'subject') {
+    navigator.clipboard.writeText(followUpSubject)
+      .then(() => flashBtn(btn, btnLabels[part]))
+      .catch(() => showErr('Clipboard access denied.'));
+    return;
+  }
+
+  const paras = followUpBody.split('\n\n').filter(p => p.trim());
+  const htmlBody = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;max-width:680px;">
+    ${paras.map(p => `<p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#1a1a1a;">${escHtml(p.trim())}</p>`).join('')}
+  </div>`;
+  const plainBody = followUpBody;
+
+  const fullHtml  = part === 'all' ? `<p style="font-family:Arial,sans-serif;font-size:13px;color:#444;margin:0 0 12px;"><b>Subject:</b> ${escHtml(followUpSubject)}</p>${htmlBody}` : htmlBody;
+  const fullPlain = part === 'all' ? `Subject: ${followUpSubject}\n\n${plainBody}` : plainBody;
+
+  if (window.ClipboardItem) {
+    const item = new ClipboardItem({
+      'text/html':  new Blob([fullHtml],  { type: 'text/html'  }),
+      'text/plain': new Blob([fullPlain], { type: 'text/plain' }),
+    });
+    navigator.clipboard.write([item])
+      .then(() => flashBtn(btn, btnLabels[part]))
+      .catch(() => showErr('Clipboard access denied. Try a different browser.'));
+  } else {
     const div = document.createElement('div');
     div.contentEditable = 'true';
     div.style.cssText = 'position:fixed;opacity:0;top:-9999px;left:-9999px';
